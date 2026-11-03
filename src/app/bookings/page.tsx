@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { crmApi, type Booking } from '../../lib/api';
 import { useAgency } from '../../context/AgencyContext';
+import CustomSelect, { type SelectOption } from '../../components/CustomSelect';
 
 const COLUMNS = [
   { key: 'new', title: '🆕 Новые', color: 'border-t-blue-500' },
@@ -19,6 +20,14 @@ const COLUMNS = [
   { key: 'confirmed', title: '✅ Подтверждены', color: 'border-t-emerald-500' },
   { key: 'paid', title: '💳 Оплачены', color: 'border-t-purple-500' },
   { key: 'cancelled', title: '❌ Отменены', color: 'border-t-slate-400' },
+];
+
+const STATUS_OPTIONS: SelectOption[] = [
+  { value: 'new', label: 'Новая', dotColor: 'bg-blue-500' },
+  { value: 'contacted', label: 'В работе', dotColor: 'bg-amber-500' },
+  { value: 'confirmed', label: 'Подтверждена', dotColor: 'bg-emerald-500' },
+  { value: 'paid', label: 'Оплачена', dotColor: 'bg-purple-500' },
+  { value: 'cancelled', label: 'Отменена', dotColor: 'bg-rose-500' },
 ];
 
 export default function CRMBookingsPage() {
@@ -62,7 +71,7 @@ export default function CRMBookingsPage() {
   const renderCard = (b: Booking) => (
     <div
       key={b.id}
-      className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm space-y-2.5"
+      className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm space-y-2.5 transition-shadow hover:shadow-md"
     >
       <div className="flex items-start justify-between gap-2">
         <div>
@@ -77,7 +86,7 @@ export default function CRMBookingsPage() {
         </div>
         <button
           onClick={() => deleteMutation.mutate(b.id)}
-          className="text-slate-300 hover:text-rose-500 p-1"
+          className="text-slate-300 hover:text-rose-500 p-1 transition-colors"
           title="Удалить заявку"
         >
           <Trash2 size={13} />
@@ -138,7 +147,7 @@ export default function CRMBookingsPage() {
             setEditingNoteId(b.id);
             setNoteText(b.manager_notes || '');
           }}
-          className="w-full text-left text-[11px] text-slate-500 hover:text-slate-800 flex items-center gap-1"
+          className="w-full text-left text-[11px] text-slate-500 hover:text-slate-800 flex items-center gap-1 transition-colors"
         >
           <MessageSquare size={11} />
           <span className="truncate">
@@ -147,27 +156,25 @@ export default function CRMBookingsPage() {
         </button>
       )}
 
-      {/* Status Selector */}
+      {/* Custom Status Selector */}
       <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
-        <select
+        <CustomSelect
           value={b.status}
-          onChange={(e) =>
-            updateMutation.mutate({ id: b.id, status: e.target.value })
+          options={STATUS_OPTIONS}
+          onChange={(newStatus) =>
+            updateMutation.mutate({ id: b.id, status: newStatus })
           }
-          className="text-[11px] font-bold bg-sand-100 rounded-full px-3 py-1 border border-slate-200 cursor-pointer flex-1"
-        >
-          <option value="new">🆕 Новая</option>
-          <option value="contacted">📞 В работе</option>
-          <option value="confirmed">✅ Подтверждена</option>
-          <option value="paid">💳 Оплачена</option>
-          <option value="cancelled">❌ Отменена</option>
-        </select>
+          variant="compact"
+          searchable={false}
+          menuWidth="w-44"
+          className="flex-1"
+        />
 
         <a
           href={`https://t.me/+${b.client_phone.replace(/\D/g, '')}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="p-1.5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100"
+          className="p-1.5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
           title="Открыть Telegram клиента"
         >
           <Send size={12} />
@@ -207,7 +214,7 @@ export default function CRMBookingsPage() {
           <div className="bg-white p-1 rounded-full border border-slate-200 flex items-center">
             <button
               onClick={() => setView('kanban')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all ${
                 view === 'kanban'
                   ? 'bg-primary-500 text-white'
                   : 'text-slate-600 hover:text-slate-900'
@@ -218,7 +225,7 @@ export default function CRMBookingsPage() {
             </button>
             <button
               onClick={() => setView('table')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all ${
                 view === 'table'
                   ? 'bg-primary-500 text-white'
                   : 'text-slate-600 hover:text-slate-900'
@@ -267,16 +274,16 @@ export default function CRMBookingsPage() {
           })}
         </div>
       ) : (
-        <div className="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-sm">
+        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm pb-16">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-sand-50 border-b border-slate-200/80 text-slate-500 font-bold">
-                <th className="p-4">Клиент</th>
+                <th className="p-4 rounded-tl-3xl">Клиент</th>
                 <th className="p-4">Телефон</th>
                 <th className="p-4">Тур / Направление</th>
                 <th className="p-4">Туроператор</th>
                 <th className="p-4">Сумма</th>
-                <th className="p-4">Статус</th>
+                <th className="p-4 rounded-tr-3xl">Статус</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -300,20 +307,18 @@ export default function CRMBookingsPage() {
                   <td className="p-4 font-extrabold text-emerald-600">
                     ${b.total_price_usd || 0} ({b.travelers_count} чел.)
                   </td>
-                  <td className="p-4">
-                    <select
+                  <td className="p-4 w-44">
+                    <CustomSelect
                       value={b.status}
-                      onChange={(e) =>
-                        updateMutation.mutate({ id: b.id, status: e.target.value })
+                      options={STATUS_OPTIONS}
+                      onChange={(newStatus) =>
+                        updateMutation.mutate({ id: b.id, status: newStatus })
                       }
-                      className="text-xs font-bold bg-sand-100 rounded-full px-3 py-1.5 border border-slate-200 cursor-pointer"
-                    >
-                      <option value="new">🆕 Новая</option>
-                      <option value="contacted">📞 В работе</option>
-                      <option value="confirmed">✅ Подтверждена</option>
-                      <option value="paid">💳 Оплачена</option>
-                      <option value="cancelled">❌ Отменена</option>
-                    </select>
+                      variant="compact"
+                      align="right"
+                      searchable={false}
+                      menuWidth="w-44"
+                    />
                   </td>
                 </tr>
               ))}

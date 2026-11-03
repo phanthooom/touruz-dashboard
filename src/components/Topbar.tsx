@@ -1,9 +1,10 @@
 'use client';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Building2, Plus, RefreshCw } from 'lucide-react';
+import { Building2, Plus, RefreshCw, Globe } from 'lucide-react';
 import { useAgency } from '../context/AgencyContext';
 import TourFormModal from './TourFormModal';
+import CustomSelect, { type SelectOption } from './CustomSelect';
 
 export default function Topbar() {
   const queryClient = useQueryClient();
@@ -17,9 +18,27 @@ export default function Topbar() {
     setTimeout(() => setRefreshing(false), 500);
   };
 
+  const agencyOptions: SelectOption[] = useMemo(
+    () => [
+      {
+        value: 'all',
+        label: 'Все туроператоры',
+        badge: `${agencies.length}`,
+        icon: <Globe size={14} />,
+      },
+      ...agencies.map((a) => ({
+        value: String(a.id),
+        label: a.name,
+        badge: `${a.tours_count || 0} туров`,
+        dotColor: a.is_verified ? 'bg-primary-500' : 'bg-slate-400',
+      })),
+    ],
+    [agencies]
+  );
+
   return (
     <>
-      <header className="h-16 bg-white/90 backdrop-blur border-b border-slate-200/80 px-6 flex items-center justify-between sticky top-0 z-20">
+      <header className="h-16 bg-white/90 backdrop-blur border-b border-slate-200/80 px-6 flex items-center justify-between sticky top-0 z-30">
         {/* Left: Agency Selector */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
@@ -27,21 +46,17 @@ export default function Topbar() {
             <span className="hidden sm:inline">Туроператор:</span>
           </div>
 
-          <select
-            value={selectedAgencyId ?? 'all'}
-            onChange={(e) => {
-              const val = e.target.value;
-              setSelectedAgencyId(val === 'all' ? null : Number(val));
-            }}
-            className="bg-sand-100 hover:bg-slate-200/60 text-slate-800 text-xs font-bold rounded-full px-4 py-2 border border-slate-200/80 cursor-pointer transition-all"
-          >
-            <option value="all">🌐 Все туроператоры ({agencies.length})</option>
-            {agencies.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name} ({a.tours_count || 0} туров)
-              </option>
-            ))}
-          </select>
+          <CustomSelect
+            value={selectedAgencyId === null ? 'all' : String(selectedAgencyId)}
+            options={agencyOptions}
+            onChange={(val) =>
+              setSelectedAgencyId(val === 'all' ? null : Number(val))
+            }
+            variant="pill"
+            searchable={true}
+            searchPlaceholder="Найти туроператора..."
+            menuWidth="w-72"
+          />
         </div>
 
         {/* Right: Actions */}

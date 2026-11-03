@@ -1,15 +1,48 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, Sparkles, Save } from 'lucide-react';
 import { crmApi, type Tour, type TourCreateInput } from '../lib/api';
 import { useAgency } from '../context/AgencyContext';
+import CustomSelect, { type SelectOption } from './CustomSelect';
 
 interface TourFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialTour?: Tour | null;
 }
+
+const DEPARTURE_OPTIONS: SelectOption[] = [
+  { value: 'Tashkent', label: 'Ташкент', badge: 'TAS', dotColor: 'bg-primary-500' },
+  { value: 'Samarkand', label: 'Самарканд', badge: 'SKD', dotColor: 'bg-emerald-500' },
+  { value: 'Fergana', label: 'Фергана', badge: 'FEG', dotColor: 'bg-amber-500' },
+  { value: 'Bukhara', label: 'Бухара', badge: 'BHK', dotColor: 'bg-purple-500' },
+  { value: 'Namangan', label: 'Наманган', badge: 'NMA', dotColor: 'bg-blue-500' },
+];
+
+const CATEGORY_OPTIONS: SelectOption[] = [
+  { value: 'beach', label: 'Пляжный отдых', badge: 'beach', dotColor: 'bg-sky-500' },
+  { value: 'excursion', label: 'Экскурсионный', badge: 'excursion', dotColor: 'bg-amber-500' },
+  { value: 'umrah', label: 'Умра и паломничество', badge: 'umrah', dotColor: 'bg-emerald-500' },
+  { value: 'family', label: 'Семейный тур', badge: 'family', dotColor: 'bg-purple-500' },
+  { value: 'romantic', label: 'Романтический', badge: 'romantic', dotColor: 'bg-rose-500' },
+  { value: 'adventure', label: 'Приключения', badge: 'adventure', dotColor: 'bg-orange-500' },
+];
+
+const STARS_OPTIONS: SelectOption[] = [
+  { value: '5', label: '5 ★ Премиум', badge: '5★', dotColor: 'bg-amber-400' },
+  { value: '4', label: '4 ★ Комфорт', badge: '4★', dotColor: 'bg-amber-400' },
+  { value: '3', label: '3 ★ Стандарт', badge: '3★', dotColor: 'bg-slate-400' },
+];
+
+const MEAL_OPTIONS: SelectOption[] = [
+  { value: 'AI', label: 'All Inclusive', badge: 'AI', dotColor: 'bg-emerald-500' },
+  { value: 'UAI', label: 'Ultra All Inclusive', badge: 'UAI', dotColor: 'bg-purple-500' },
+  { value: 'BB', label: 'Завтрак включён', badge: 'BB', dotColor: 'bg-sky-500' },
+  { value: 'HB', label: 'Завтрак + Ужин', badge: 'HB', dotColor: 'bg-amber-500' },
+  { value: 'FB', label: 'Полный пансион', badge: 'FB', dotColor: 'bg-blue-500' },
+  { value: 'RO', label: 'Без питания', badge: 'RO', dotColor: 'bg-slate-400' },
+];
 
 export default function TourFormModal({
   isOpen,
@@ -34,6 +67,17 @@ export default function TourFormModal({
   const [description, setDescription] = useState('');
   const [isHot, setIsHot] = useState(false);
   const [isActive, setIsActive] = useState(true);
+
+  const agencyOptions: SelectOption[] = useMemo(
+    () =>
+      agencies.map((a) => ({
+        value: String(a.id),
+        label: a.name,
+        badge: `${a.tours_count || 0} туров`,
+        dotColor: a.is_verified ? 'bg-primary-500' : 'bg-slate-400',
+      })),
+    [agencies]
+  );
 
   useEffect(() => {
     if (initialTour) {
@@ -128,7 +172,7 @@ export default function TourFormModal({
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-slate-100 text-slate-400"
+            className="p-2 rounded-full hover:bg-slate-100 text-slate-400 transition-colors"
           >
             <X size={18} />
           </button>
@@ -138,32 +182,25 @@ export default function TourFormModal({
           <div className="grid sm:grid-cols-2 gap-3.5">
             <div>
               <label className="font-bold text-slate-600 block mb-1">Туроператор</label>
-              <select
-                value={agencyId}
-                onChange={(e) => setAgencyId(Number(e.target.value))}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 bg-sand-50 font-semibold text-slate-800"
-              >
-                {agencies.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name}
-                  </option>
-                ))}
-              </select>
+              <CustomSelect
+                value={String(agencyId)}
+                options={agencyOptions}
+                onChange={(val) => setAgencyId(Number(val))}
+                variant="input"
+                searchable={true}
+                searchPlaceholder="Поиск оператора..."
+              />
             </div>
 
             <div>
               <label className="font-bold text-slate-600 block mb-1">Город вылета</label>
-              <select
+              <CustomSelect
                 value={departureCity}
-                onChange={(e) => setDepartureCity(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 bg-sand-50 font-semibold text-slate-800"
-              >
-                <option value="Tashkent">Ташкент (TAS)</option>
-                <option value="Samarkand">Самарканд (SKD)</option>
-                <option value="Fergana">Фергана (FEG)</option>
-                <option value="Bukhara">Бухара (BHK)</option>
-                <option value="Namangan">Наманган (NMA)</option>
-              </select>
+                options={DEPARTURE_OPTIONS}
+                onChange={(val) => setDepartureCity(val)}
+                variant="input"
+                searchable={false}
+              />
             </div>
           </div>
 
@@ -206,18 +243,15 @@ export default function TourFormModal({
 
             <div>
               <label className="font-bold text-slate-600 block mb-1">Категория</label>
-              <select
+              <CustomSelect
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 bg-sand-50 font-semibold"
-              >
-                <option value="beach">Пляжный (beach)</option>
-                <option value="excursion">Экскурсия (excursion)</option>
-                <option value="umrah">Умра (umrah)</option>
-                <option value="family">Семейный (family)</option>
-                <option value="romantic">Романтика (romantic)</option>
-                <option value="adventure">Приключения (adventure)</option>
-              </select>
+                options={CATEGORY_OPTIONS}
+                onChange={(val) => setCategory(val)}
+                variant="input"
+                align="right"
+                searchable={false}
+                menuWidth="w-56"
+              />
             </div>
           </div>
 
@@ -235,31 +269,26 @@ export default function TourFormModal({
 
             <div>
               <label className="font-bold text-slate-600 block mb-1">Звёзды отеля</label>
-              <select
-                value={hotelStars}
-                onChange={(e) => setHotelStars(Number(e.target.value))}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 bg-sand-50 font-semibold"
-              >
-                <option value={5}>5 ★</option>
-                <option value={4}>4 ★</option>
-                <option value={3}>3 ★</option>
-              </select>
+              <CustomSelect
+                value={String(hotelStars)}
+                options={STARS_OPTIONS}
+                onChange={(val) => setHotelStars(Number(val))}
+                variant="input"
+                searchable={false}
+              />
             </div>
 
             <div>
               <label className="font-bold text-slate-600 block mb-1">Питание</label>
-              <select
+              <CustomSelect
                 value={mealType}
-                onChange={(e) => setMealType(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 bg-sand-50 font-semibold"
-              >
-                <option value="AI">All Inclusive (AI)</option>
-                <option value="UAI">Ultra All Inc (UAI)</option>
-                <option value="BB">Завтрак (BB)</option>
-                <option value="HB">Полупансион (HB)</option>
-                <option value="FB">Полный пансион (FB)</option>
-                <option value="RO">Без питания (RO)</option>
-              </select>
+                options={MEAL_OPTIONS}
+                onChange={(val) => setMealType(val)}
+                variant="input"
+                align="right"
+                searchable={false}
+                menuWidth="w-52"
+              />
             </div>
           </div>
 

@@ -1,9 +1,10 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Building2, Save, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { Save, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { crmApi } from '../../lib/api';
 import { useAgency } from '../../context/AgencyContext';
+import CustomSelect, { type SelectOption } from '../../components/CustomSelect';
 
 export default function AgencySettingsPage() {
   const queryClient = useQueryClient();
@@ -18,6 +19,17 @@ export default function AgencySettingsPage() {
   const [description, setDescription] = useState('');
   const [isVerified, setIsVerified] = useState(true);
   const [savedNotice, setSavedNotice] = useState(false);
+
+  const agencyOptions: SelectOption[] = useMemo(
+    () =>
+      agencies.map((a) => ({
+        value: String(a.id),
+        label: a.name,
+        badge: `${a.tours_count || 0} туров`,
+        dotColor: a.is_verified ? 'bg-primary-500' : 'bg-slate-400',
+      })),
+    [agencies]
+  );
 
   useEffect(() => {
     if (current) {
@@ -67,21 +79,20 @@ export default function AgencySettingsPage() {
       </div>
 
       {!selectedAgency && (
-        <div className="p-4 rounded-2xl bg-primary-50 border border-primary-100 text-xs text-primary-700 flex items-center justify-between">
-          <span>
-            Выберите конкретное агентство в верхней панели или ниже для редактирования:
+        <div className="p-4 rounded-2xl bg-primary-50/70 border border-primary-100 text-xs text-primary-800 flex flex-wrap items-center justify-between gap-3">
+          <span className="font-semibold">
+            Выберите конкретное агентство для редактирования профиля:
           </span>
-          <select
-            value={current.id}
-            onChange={(e) => setSelectedAgencyId(Number(e.target.value))}
-            className="bg-white rounded-full px-3 py-1 font-bold border border-primary-200"
-          >
-            {agencies.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
-            ))}
-          </select>
+          <CustomSelect
+            value={String(current.id)}
+            options={agencyOptions}
+            onChange={(val) => setSelectedAgencyId(Number(val))}
+            variant="pill"
+            align="right"
+            searchable={true}
+            searchPlaceholder="Найти агентство..."
+            menuWidth="w-64"
+          />
         </div>
       )}
 
