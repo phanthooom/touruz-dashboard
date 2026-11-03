@@ -9,6 +9,7 @@ import {
   ExternalLink,
   Plane,
   ShieldCheck,
+  Star,
 } from 'lucide-react';
 import { B2C_URL } from '../lib/api';
 import { useAgency } from '../context/AgencyContext';
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
   { href: '/', label: 'Дашборд и Аналитика', icon: LayoutDashboard },
   { href: '/bookings', label: 'CRM Заявок (Воронка)', icon: Users },
   { href: '/tours', label: 'Управление турами', icon: Briefcase },
+  { href: '/reviews', label: 'Отзывы и рейтинг', icon: Star },
   { href: '/settings', label: 'Профиль агентства', icon: Settings },
 ];
 

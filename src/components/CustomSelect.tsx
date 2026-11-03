@@ -94,10 +94,10 @@ export default function CustomSelect({
             ? 'bg-white border-primary-500 text-slate-900 shadow-sm ring-2 ring-primary-500/15'
             : 'bg-sand-50 hover:bg-white border-slate-200 text-slate-800'
         }`
-      : `flex items-center justify-between gap-2.5 pl-3.5 pr-2.5 py-2 rounded-full border text-xs font-bold transition-all duration-200 select-none ${
+      : `flex items-center justify-between gap-2.5 pl-3.5 pr-2.5 py-2 rounded-full text-xs font-bold transition-all duration-200 select-none ${
           open
-            ? 'bg-white border-primary-500 text-slate-900 shadow-sm ring-2 ring-primary-500/15'
-            : 'bg-sand-100 hover:bg-slate-200/60 border-slate-200/80 text-slate-800'
+            ? 'bg-white border border-primary-500 text-slate-900 shadow-sm ring-2 ring-primary-500/15'
+            : 'liquid-glass-pill hover:bg-white/90 text-slate-800'
         }`;
 
   return (
@@ -146,7 +146,7 @@ export default function CustomSelect({
       {/* Floating Dropdown Panel — outer container has p-0 so scrollbar is 100% flush right */}
       {open && (
         <div
-          className={`absolute top-full mt-2 z-[100] bg-white border border-slate-200/90 rounded-2xl shadow-[0_20px_50px_-12px_rgba(15,23,42,0.2)] overflow-hidden p-0 animate-dropdown ${
+          className={`absolute top-full mt-2 z-[100] liquid-glass-popover rounded-2xl overflow-hidden p-0 animate-dropdown ${
             align === 'right' ? 'right-0' : 'left-0'
           } ${menuWidth || 'w-full min-w-[230px]'}`}
         >

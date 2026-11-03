@@ -38,7 +38,7 @@ export default function Topbar() {
 
   return (
     <>
-      <header className="h-16 bg-white/90 backdrop-blur border-b border-slate-200/80 px-6 flex items-center justify-between sticky top-0 z-30">
+      <header className="h-16 liquid-glass-topbar px-6 flex items-center justify-between sticky top-0 z-30">
         {/* Left: Agency Selector */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 text-xs font-bold text-slate-500">

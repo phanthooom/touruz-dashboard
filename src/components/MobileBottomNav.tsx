@@ -6,12 +6,14 @@ import {
   KanbanSquare,
   PlaneTakeoff,
   Settings,
+  Star,
 } from 'lucide-react';
 
 const MOBILE_ITEMS = [
   { href: '/', label: 'Сводка', icon: LayoutDashboard },
   { href: '/bookings', label: 'Заявки', icon: KanbanSquare },
   { href: '/tours', label: 'Туры', icon: PlaneTakeoff },
+  { href: '/reviews', label: 'Отзывы', icon: Star },
   { href: '/settings', label: 'Бот & Настр.', icon: Settings },
 ];
 
@@ -27,7 +29,7 @@ export default function MobileBottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-[10px] font-bold transition-all ${
+            className={`flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all ${
               active
                 ? 'text-primary-600 bg-primary-50'
                 : 'text-slate-500 hover:text-slate-800'

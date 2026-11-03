@@ -201,3 +201,55 @@ export const crmApi = {
       })
       .then((r) => r.data),
 };
+
+// ─── Reviews (модерация отзывов) ──────────────────────────────────────────────
+
+export type ReviewSource = 'site' | 'telegram' | 'demo';
+export type ReviewStatusFilter = 'all' | 'pending' | 'approved';
+
+export interface Review {
+  id: number;
+  agency_id: number;
+  tour_id?: number | null;
+  author_name: string;
+  rating: number;
+  comment: string;
+  source: ReviewSource;
+  agency_reply?: string | null;
+  is_approved: boolean;
+  created_at: string;
+  updated_at?: string;
+  agency_name?: string | null;
+  tour_title?: string | null;
+}
+
+export interface ReviewListCRM {
+  items: Review[];
+  counts: { all: number; pending: number; approved: number };
+}
+
+export const reviewsApi = {
+  list: (
+    params: {
+      agency_id?: number | null;
+      status?: ReviewStatusFilter;
+      rating?: number | null;
+      q?: string;
+    } = {}
+  ) =>
+    api
+      .get<ReviewListCRM>('/crm/reviews', {
+        params: {
+          ...(params.agency_id ? { agency_id: params.agency_id } : {}),
+          ...(params.status && params.status !== 'all' ? { status: params.status } : {}),
+          ...(params.rating ? { rating: params.rating } : {}),
+          ...(params.q ? { q: params.q } : {}),
+        },
+      })
+      .then((r) => r.data),
+
+  update: (reviewId: number, data: { is_approved?: boolean; agency_reply?: string | null }) =>
+    api.patch<Review>(`/crm/reviews/${reviewId}`, data).then((r) => r.data),
+
+  remove: (reviewId: number) => api.delete(`/crm/reviews/${reviewId}`).then((r) => r.data),
+};
