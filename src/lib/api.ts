@@ -170,4 +170,34 @@ export const crmApi = {
 
   deleteTour: (tourId: number) =>
     api.delete(`/crm/tours/${tourId}`).then((r) => r.data),
+
+  telegramFeed: () =>
+    api
+      .get<{
+        items: {
+          id: number;
+          booking_id: number;
+          client_name: string;
+          client_phone: string;
+          tour_title: string;
+          agency_name: string;
+          total_price_usd: number;
+          text: string;
+          sent_at: string;
+          delivered_to_telegram_api: boolean;
+        }[];
+      }>('/crm/telegram-feed')
+      .then((r) => r.data.items),
+
+  telegramTest: (payload: { bot_token?: string; chat_id?: string }) =>
+    api.post('/crm/telegram-test', payload).then((r) => r.data),
+
+  telegramCallbackSimulate: (bookingId: number, status: string) =>
+    api
+      .post('/crm/telegram-webhook', {
+        callback_query: {
+          data: `booking_status:${bookingId}:${status}`,
+        },
+      })
+      .then((r) => r.data),
 };
