@@ -31,9 +31,13 @@ export default function AgencySettingsPage() {
 
   // Telegram Bot & Mini App state
   const [botToken, setBotToken] = useState('');
-  const [chatId, setChatId] = useState('');
+  const [chatId, setChatId] = useState('638384527');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [callbackSuccess, setCallbackSuccess] = useState<string | null>(null);
+  const [deliveryStatus, setDeliveryStatus] = useState<{
+    ok: boolean;
+    note: string;
+  } | null>(null);
 
   const agencyOptions: SelectOption[] = useMemo(
     () =>
@@ -85,8 +89,14 @@ export default function AgencySettingsPage() {
         bot_token: botToken,
         chat_id: chatId,
       }),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
       queryClient.invalidateQueries({ queryKey: ['crm-telegram-feed'] });
+      if (res?.delivery_note) {
+        setDeliveryStatus({
+          ok: Boolean(res.delivered_to_telegram_api),
+          note: res.delivery_note,
+        });
+      }
     },
   });
 
@@ -385,6 +395,18 @@ export default function AgencySettingsPage() {
                 : 'Отправить тестовое уведомление о заявке в Telegram'}
             </span>
           </button>
+
+          {deliveryStatus && (
+            <div
+              className={`p-3 rounded-xl text-xs font-bold border ${
+                deliveryStatus.ok
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                  : 'bg-amber-50 border-amber-200 text-amber-800'
+              }`}
+            >
+              {deliveryStatus.note}
+            </div>
+          )}
 
           {callbackSuccess && (
             <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold text-center">
