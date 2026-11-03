@@ -13,6 +13,7 @@ import {
 import { crmApi, type Booking } from '../../lib/api';
 import { useAgency } from '../../context/AgencyContext';
 import CustomSelect, { type SelectOption } from '../../components/CustomSelect';
+import PaymentLinkButton from '../../components/PaymentLinkButton';
 
 const COLUMNS = [
   { key: 'new', title: '🆕 Новые', color: 'border-t-blue-500' },
@@ -180,6 +181,9 @@ export default function CRMBookingsPage() {
           <Send size={12} />
         </a>
       </div>
+
+      {/* Payme / Click / Uzum */}
+      <PaymentLinkButton booking={b} />
     </div>
   );
 

@@ -1,12 +1,113 @@
 import axios from 'axios';
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-export const B2C_URL = process.env.NEXT_PUBLIC_B2C_URL || 'http://localhost:3002';
+const isCloudBrowser =
+  typeof window !== 'undefined' &&
+  !window.location.hostname.includes('localhost') &&
+  !window.location.hostname.includes('127.0.0.1');
+
+export const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (isCloudBrowser ? 'https://touruz-miniapp.vercel.app/api/v1' : 'http://localhost:8000/api/v1');
+export const B2C_URL =
+  process.env.NEXT_PUBLIC_B2C_URL ||
+  (isCloudBrowser ? 'https://touruz-miniapp.vercel.app' : 'http://localhost:3002');
 
 export const api = axios.create({
   baseURL: API_BASE,
   timeout: 15000,
 });
+
+// ─── JWT auth (CRM) ───────────────────────────────────────────────────────────
+
+export const TOKEN_KEY = 'touruz_crm_token';
+
+export const tokenStore = {
+  get: (): string | null => {
+    try {
+      return typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
+    } catch {
+      return null;
+    }
+  },
+  set: (token: string) => {
+    try {
+      localStorage.setItem(TOKEN_KEY, token);
+    } catch {}
+  },
+  clear: () => {
+    try {
+      localStorage.removeItem(TOKEN_KEY);
+    } catch {}
+  },
+};
+
+api.interceptors.request.use((config) => {
+  const token = tokenStore.get();
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+api.interceptors.response.use(
+  (r) => r,
+  (error) => {
+    const status = error?.response?.status;
+    const url: string = error?.config?.url || '';
+    if (status === 401 && !url.includes('/auth/login') && typeof window !== 'undefined') {
+      tokenStore.clear();
+      if (window.location.pathname !== '/login') {
+        const next = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = `/login?next=${next}`;
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
+export type UserRole = 'customer' | 'agency_manager' | 'superadmin';
+
+export interface CRMUser {
+  id: number;
+  email: string;
+  full_name?: string | null;
+  phone?: string | null;
+  is_active: boolean;
+  is_superuser: boolean;
+  role: UserRole;
+  agency_id?: number | null;
+  agency_name?: string | null;
+  created_at: string;
+}
+
+export const authApi = {
+  login: (email: string, password: string) => {
+    const form = new URLSearchParams();
+    form.set('username', email.trim());
+    form.set('password', password);
+    return api
+      .post<{ access_token: string; token_type: string }>('/auth/login', form, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      })
+      .then((r) => r.data);
+  },
+  me: () => api.get<CRMUser>('/auth/me').then((r) => r.data),
+};
+
+export interface CRMUserInput {
+  email?: string;
+  password?: string;
+  full_name?: string | null;
+  phone?: string | null;
+  role?: 'agency_manager' | 'superadmin';
+  agency_id?: number | null;
+  is_active?: boolean;
+}
+
+export const usersApi = {
+  list: () => api.get<CRMUser[]>('/crm/users').then((r) => r.data),
+  create: (data: CRMUserInput) => api.post<CRMUser>('/crm/users', data).then((r) => r.data),
+  update: (id: number, data: CRMUserInput) =>
+    api.patch<CRMUser>(`/crm/users/${id}`, data).then((r) => r.data),
+};
 
 export interface Agency {
   id: number;
@@ -252,4 +353,43 @@ export const reviewsApi = {
     api.patch<Review>(`/crm/reviews/${reviewId}`, data).then((r) => r.data),
 
   remove: (reviewId: number) => api.delete(`/crm/reviews/${reviewId}`).then((r) => r.data),
+};
+
+// ─── Payments (Payme / Click / Uzum) ─────────────────────────────────────────
+
+export type PaymentProvider = 'payme' | 'click' | 'uzum';
+
+export interface Payment {
+  id: number;
+  booking_id: number;
+  token: string;
+  provider?: PaymentProvider | null;
+  status: 'pending' | 'paid' | 'cancelled' | 'expired';
+  amount_usd: number;
+  amount_uzs: number;
+  exchange_rate: number;
+  is_sandbox: boolean;
+  checkout_url?: string | null;
+  pay_page_url?: string | null;
+  created_at: string;
+  paid_at?: string | null;
+  expires_at?: string | null;
+}
+
+export const paymentsApi = {
+  list: (bookingId: number) =>
+    api.get<Payment[]>('/crm/payments', { params: { booking_id: bookingId } }).then((r) => r.data),
+
+  create: (bookingId: number, provider?: PaymentProvider | null) =>
+    api
+      .post<Payment>(`/bookings/${bookingId}/pay`, { ...(provider ? { provider } : {}), locale: 'ru' })
+      .then((r) => r.data),
+
+  confirmSandbox: (bookingId: number, token: string, provider?: PaymentProvider | null) =>
+    api
+      .post<Payment>(`/bookings/${bookingId}/confirm-payment`, {
+        token,
+        ...(provider ? { provider } : {}),
+      })
+      .then((r) => r.data),
 };

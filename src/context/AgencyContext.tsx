@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { crmApi, type Agency } from '../lib/api';
+import { useAuth } from './AuthContext';
 
 interface AgencyContextValue {
   agencies: Agency[];
@@ -20,6 +21,8 @@ const AgencyContext = createContext<AgencyContextValue>({
 });
 
 export function AgencyProvider({ children }: { children: React.ReactNode }) {
+  const { user, isSuperadmin } = useAuth();
+  const lockedAgencyId = user && !isSuperadmin ? user.agency_id ?? null : null;
   const [selectedAgencyId, setSelectedAgencyIdState] = useState<number | null>(null);
 
   useEffect(() => {
@@ -32,7 +35,13 @@ export function AgencyProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Менеджер агентства всегда работает только в своём кабинете
+  useEffect(() => {
+    if (lockedAgencyId) setSelectedAgencyIdState(lockedAgencyId);
+  }, [lockedAgencyId]);
+
   const setSelectedAgencyId = (id: number | null) => {
+    if (lockedAgencyId) return;
     setSelectedAgencyIdState(id);
     if (id === null) {
       localStorage.setItem('touruz_crm_agency_id', 'all');
@@ -42,8 +51,9 @@ export function AgencyProvider({ children }: { children: React.ReactNode }) {
   };
 
   const { data: agencies = [], isLoading: isLoadingAgencies } = useQuery({
-    queryKey: ['crm-agencies'],
+    queryKey: ['crm-agencies', user?.id ?? null],
     queryFn: () => crmApi.agencies(),
+    enabled: !!user,
   });
 
   const selectedAgency =

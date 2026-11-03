@@ -1,14 +1,25 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import './globals.css';
 import Providers from './providers';
-import Sidebar from '../components/Sidebar';
-import Topbar from '../components/Topbar';
-import MobileBottomNav from '../components/MobileBottomNav';
+import AppShell from '../components/AppShell';
 
 export const metadata: Metadata = {
   title: 'TourUZ Dashboard — B2B Agency CRM & Extranet',
   description: 'Панель управления турами и CRM заявок для туроператоров Узбекистана',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'TourUZ CRM',
+  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({
@@ -24,18 +35,9 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
       </head>
-      <body>
+      <body className="overflow-x-clip min-h-[100dvh]">
         <Providers>
-          <div className="flex min-h-screen bg-sand-50 pb-16 lg:pb-0">
-            <Sidebar />
-            <div className="flex-1 flex flex-col min-w-0">
-              <Topbar />
-              <main className="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto">
-                {children}
-              </main>
-            </div>
-          </div>
-          <MobileBottomNav />
+          <AppShell>{children}</AppShell>
         </Providers>
       </body>
     </html>
