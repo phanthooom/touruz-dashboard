@@ -94,8 +94,8 @@ export default function TelegramMiniAppStudioPage() {
   const [startCommandInput, setStartCommandInput] = useState('/start');
 
   // Bot installer & live browser poller state
-  const [botToken, setBotToken] = useState('9224583678:AAEPslnuGe-pk0sfXs3PnOAPSMMHMu5ItEU');
-  const [chatId, setChatId] = useState('638384527');
+  const [botToken, setBotToken] = useState('');
+  const [chatId, setChatId] = useState('');
   const [publicMiniAppUrl, setPublicMiniAppUrl] = useState(
     `${LIVE_HTTPS_TUNNEL}/ru/tours?tma=1&fullscreen=1`
   );
@@ -752,7 +752,7 @@ export default function TelegramMiniAppStudioPage() {
                     type="text"
                     value={chatId}
                     onChange={(e) => setChatId(e.target.value)}
-                    placeholder="638384527"
+                    placeholder="123456789"
                     className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-mono text-slate-800 focus:outline-none focus:border-primary-500"
                   />
                 </div>

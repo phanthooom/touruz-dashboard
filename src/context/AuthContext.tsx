@@ -40,13 +40,13 @@ function buildTelegramCRMUser(): CRMUser | null {
   const tgUser = tg?.initDataUnsafe?.user;
   const fullName = tgUser
     ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ')
-    : 'Санжар (@azamkhujaevs)';
+    : 'Администратор TourUZ';
 
   return {
     id: tgUser?.id || 1,
     email: tgUser?.username ? `@${tgUser.username}` : 'admin@touruz.uz',
     full_name: fullName,
-    phone: '+998 93 380-83-80',
+    phone: '',
     is_active: true,
     is_superuser: true,
     role: 'superadmin',

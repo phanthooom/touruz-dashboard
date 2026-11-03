@@ -31,7 +31,7 @@ export default function AgencySettingsPage() {
 
   // Telegram Bot & Mini App state
   const [botToken, setBotToken] = useState('');
-  const [chatId, setChatId] = useState('638384527');
+  const [chatId, setChatId] = useState('');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [callbackSuccess, setCallbackSuccess] = useState<string | null>(null);
   const [deliveryStatus, setDeliveryStatus] = useState<{
