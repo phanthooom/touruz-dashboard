@@ -1,8 +1,16 @@
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
+import { Onest } from 'next/font/google';
 import './globals.css';
 import Providers from './providers';
 import AppShell from '../components/AppShell';
+
+const onest = Onest({
+  subsets: ['cyrillic', 'latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-onest',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'TourUZ Dashboard — B2B Agency CRM & Extranet',
@@ -28,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ru">
+    <html lang="ru" className={onest.variable}>
       <head>
         <Script
           src="https://telegram.org/js/telegram-web-app.js"

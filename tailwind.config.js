@@ -30,6 +30,9 @@ module.exports = {
           900: '#0F172A',
         },
       },
+      fontFamily: {
+        sans: ['var(--font-onest)', 'Onest', 'TT Norms Pro', 'TT Commons Pro', 'system-ui', 'sans-serif'],
+      },
     },
   },
   plugins: [],
