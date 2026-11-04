@@ -72,7 +72,7 @@ export default function CRMBookingsPage() {
   const renderCard = (b: Booking) => (
     <div
       key={b.id}
-      className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm space-y-2.5 transition-shadow hover:shadow-md"
+      className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm space-y-2.5 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]"
     >
       <div className="flex items-start justify-between gap-2">
         <div>
